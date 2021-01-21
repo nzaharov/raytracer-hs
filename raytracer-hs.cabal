@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8b25b64822679fbe5a69dceb70b7d509a081b42fddd9717336764a4645c6c308
+-- hash: d6a6f6c133c3fac1c2503d6900ea6af24feff9ffae6605f3feca2c5df4414529
 
 name:           raytracer-hs
 version:        0.1.0.0
@@ -27,13 +27,18 @@ source-repository head
 
 library
   exposed-modules:
+      Camera
       Lib
+      Ray
+      Vector
   other-modules:
       Paths_raytracer_hs
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , hip
+    , random
   default-language: Haskell2010
 
 executable raytracer-hs-exe
