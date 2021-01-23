@@ -1,7 +1,8 @@
 module Hit where
 
-import Ray
 import Math.Vector
+import Ray
+import System.Random
 
 data Hit = Hit
   { point :: Vec3 Double,
@@ -10,5 +11,5 @@ data Hit = Hit
   }
   deriving (Eq)
 
-class Hittable a where
-  hit :: a -> Ray -> Double -> Double -> Maybe Hit
+class Intersectable a where
+  intersect :: StdGen -> a -> Ray -> Double -> Double -> Maybe (Ray, Color)

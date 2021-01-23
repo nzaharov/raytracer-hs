@@ -1,5 +1,7 @@
 module Math.Vector where
 
+import System.Random
+
 data Vec3 a = Vec3 a a a deriving (Show, Eq)
 
 add :: Num a => Vec3 a -> Vec3 a -> Vec3 a
@@ -28,3 +30,18 @@ unit vec = vec `divScalar` norm vec
 
 dot :: Num a => Vec3 a -> Vec3 a -> a
 dot (Vec3 x y z) (Vec3 x' y' z') = x * x' + y * y' + z * z'
+
+randVecInRange :: StdGen -> (Double, Double) -> Vec3 Double
+randVecInRange rng range = do
+  let (x, _) = randomR range rng
+  let (y, _) = randomR range rng
+  let (z, _) = randomR range rng
+  Vec3 x y z
+
+randInUnitSphere :: StdGen -> Vec3 Double
+randInUnitSphere rng = loop $ randVecInRange rng (-1, 1)
+  where
+    loop vec = do
+      if normSqr vec < 1
+        then vec
+        else loop vec
