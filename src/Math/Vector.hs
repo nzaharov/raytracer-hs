@@ -10,6 +10,9 @@ add :: Num a => Vec3 a -> Vec3 a -> Vec3 a
 subtr :: Num a => Vec3 a -> Vec3 a -> Vec3 a
 (Vec3 x y z) `subtr` (Vec3 x' y' z') = Vec3 (x - x') (y - y') (z - z')
 
+mul :: Num a => Vec3 a -> Vec3 a -> Vec3 a
+(Vec3 x y z) `mul` (Vec3 x' y' z') = Vec3 (x * x') (y * y') (z * z')
+
 neg :: Num a => Vec3 a -> Vec3 a
 neg (Vec3 x y z) = Vec3 (- x) (- y) (- z)
 

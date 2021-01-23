@@ -1,7 +1,7 @@
 module Math.Quadratic where
 
 import Control.Applicative (Alternative ((<|>)))
-import Math.Utils
+import Math.Utils ( inInterval, smaller )
 
 data Roots = One Double | Two Double Double deriving (Show)
 

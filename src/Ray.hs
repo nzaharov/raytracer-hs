@@ -14,3 +14,6 @@ origin (Ray origin _) = origin
 
 at :: Ray -> Double -> Vec3 Double
 at ray t = origin ray `add` (t `scalarMul` direction ray)
+
+black :: Color
+black = Vec3 0 0 0
