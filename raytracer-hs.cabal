@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d6a6f6c133c3fac1c2503d6900ea6af24feff9ffae6605f3feca2c5df4414529
+-- hash: 7fccbe5dfb2c35ca75ed703090fd9da4a7c60f639a13f4819eda5db769ed553c
 
 name:           raytracer-hs
 version:        0.1.0.0
@@ -28,9 +28,12 @@ source-repository head
 library
   exposed-modules:
       Camera
+      Hit
       Lib
+      Math.Utils
+      Math.Vector
+      Object
       Ray
-      Vector
   other-modules:
       Paths_raytracer_hs
   hs-source-dirs:

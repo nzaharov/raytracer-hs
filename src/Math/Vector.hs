@@ -1,6 +1,6 @@
-module Vector where
+module Math.Vector where
 
-data Vec3 a = Vec3 a a a deriving (Show)
+data Vec3 a = Vec3 a a a deriving (Show, Eq)
 
 add :: Num a => Vec3 a -> Vec3 a -> Vec3 a
 (Vec3 x y z) `add` (Vec3 x' y' z') = Vec3 (x + x') (y + y') (z + z')
@@ -25,3 +25,6 @@ norm vec = sqrt $ normSqr vec
 
 unit :: Floating a => Vec3 a -> Vec3 a
 unit vec = vec `divScalar` norm vec
+
+dot :: Num a => Vec3 a -> Vec3 a -> a
+dot (Vec3 x y z) (Vec3 x' y' z') = x * x' + y * y' + z * z'

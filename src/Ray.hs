@@ -1,6 +1,6 @@
 module Ray where
 
-import Vector
+import Math.Vector
 
 type Color = Vec3 Double
 
