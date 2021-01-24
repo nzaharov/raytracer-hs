@@ -34,6 +34,13 @@ unit vec = vec `divScalar` norm vec
 dot :: Num a => Vec3 a -> Vec3 a -> a
 dot (Vec3 x y z) (Vec3 x' y' z') = x * x' + y * y' + z * z'
 
+cross :: Num a => Vec3 a -> Vec3 a -> Vec3 a
+cross (Vec3 x y z) (Vec3 x' y' z') =
+  Vec3
+    (y * z' - z * y')
+    (z * x' - x * z')
+    (x * y' - y * x')
+
 randInSphere :: (Double, Double) -> IO (Vec3 Double)
 randInSphere range = do
   x <- randomRIO range
