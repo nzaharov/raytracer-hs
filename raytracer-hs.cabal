@@ -71,4 +71,5 @@ test-suite raytracer-hs-test
   build-depends:
       base >=4.7 && <5
     , raytracer-hs
+    , HUnit
   default-language: Haskell2010
