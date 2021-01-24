@@ -15,3 +15,6 @@ clamp x (a, b)
   | x > b = b
   | x < a = a
   | otherwise = x
+
+toRadians :: Double -> Double
+toRadians deg = pi * deg / 180

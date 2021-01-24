@@ -3,6 +3,7 @@ module Lib
   )
 where
 
+import Camera
 import Data.Foldable
 import GHC.IO
 import Graphics.Image as I
@@ -16,8 +17,6 @@ import System.Random
 import Utils
 import Prelude as P
 
-data TempCamera = Camera (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
-
 width :: Int
 width = 320
 
@@ -29,19 +28,16 @@ sampleSize = 50
 
 draw :: IO ()
 draw = do
-  -- camera
-  let vh = 2.0
-  let vw = (fromIntegral width / fromIntegral height) * vh
-  let focalLength = 1.0
-  let origin = Vec3 0.0 0.0 0.0
-  let horz = Vec3 vw 0.0 0.0
-  let vert = Vec3 0.0 vh 0.0
-  let corner =
-        origin
-          `subtr` (horz `divScalar` 2)
-          `subtr` (vert `divScalar` 2)
-          `subtr` Vec3 0 0 focalLength
-  let camera = Camera origin horz vert corner
+  let aspectRatio = fromIntegral width / fromIntegral height
+  let camera =
+        Camera
+          (Vec3 0.0 0.0 0.0)
+          (Vec3 0.0 0.0 (-1.0))
+          (Vec3 0.0 1.0 0.0)
+          75.0
+          aspectRatio
+          0.01
+          0.5
   let scene = genScene
   putStrLn "Rendering..."
   pixels <- mapM (getPixel camera scene) [(j, i) | j <- [0 .. height - 1], i <- [0 .. width - 1]]
@@ -49,8 +45,8 @@ draw = do
   writeImage "test.png" $ flipV ((fromLists $ chunks width pixels) :: Image RSU RGB Double)
   putStrLn "Done!"
 
-getPixel :: TempCamera -> Scene Object -> (Int, Int) -> IO (Pixel RGB Double)
-getPixel (Camera origin w h corner) scene (row, col) =
+getPixel :: Camera -> Scene Object -> (Int, Int) -> IO (Pixel RGB Double)
+getPixel cam scene (row, col) =
   do
     let f = \acc _ ->
           do
@@ -58,10 +54,7 @@ getPixel (Camera origin w h corner) scene (row, col) =
             r2 <- randomIO
             let u = (fromIntegral col + r1) / (fromIntegral width - 1)
             let v = (fromIntegral row + r2) / (fromIntegral height - 1)
-            let ray =
-                  Ray
-                    origin
-                    (corner `add` scalarMul u w `add` scalarMul v h `subtr` origin)
+            ray <- getRay cam u v
             color <- raytrace scene ray 50
             return $ acc `add` color
 
