@@ -1,12 +1,10 @@
-module Lib
-  ( draw,
-  )
-where
+module Lib where -- TODO: export only select modules
 
 import Camera
 import Data.Foldable
 import GHC.IO
 import Graphics.Image as I
+import ImageSettings
 import Material
 import Math.Utils
 import Math.Vector
@@ -17,36 +15,20 @@ import System.Random
 import Utils
 import Prelude as P
 
-width :: Int
-width = 320
-
-height :: Int
-height = 180
-
-sampleSize :: Int
-sampleSize = 50
-
-draw :: IO ()
-draw = do
-  let aspectRatio = fromIntegral width / fromIntegral height
-  let camera =
-        Camera
-          (Vec3 0.0 0.0 0.0)
-          (Vec3 0.0 0.0 (-1.0))
-          (Vec3 0.0 1.0 0.0)
-          75.0
-          aspectRatio
-          0.01
-          0.5
-  let scene = genScene
+render :: ImageSettings -> Camera -> Scene Object -> IO ()
+render image camera scene = do
   putStrLn "Rendering..."
-  pixels <- mapM (getPixel camera scene) [(j, i) | j <- [0 .. height - 1], i <- [0 .. width - 1]]
+  pixels <-
+    mapM
+      (getPixel image camera scene)
+      [(j, i) | j <- [0 .. height image - 1], i <- [0 .. width image - 1]]
   putStrLn "Saving image..."
-  writeImage "test.png" $ flipV ((fromLists $ chunks width pixels) :: Image RSU RGB Double)
+  writeImage (filename image) $
+    flipV ((fromLists $ chunks (width image) pixels) :: Image RSU RGB Double)
   putStrLn "Done!"
 
-getPixel :: Camera -> Scene Object -> (Int, Int) -> IO (Pixel RGB Double)
-getPixel cam scene (row, col) =
+getPixel :: ImageSettings -> Camera -> Scene Object -> (Int, Int) -> IO (Pixel RGB Double)
+getPixel (ImageSettings width height _ samples) cam scene (row, col) =
   do
     let f = \acc _ ->
           do
@@ -58,7 +40,7 @@ getPixel cam scene (row, col) =
             color <- raytrace scene ray 50
             return $ acc `add` color
 
-    (Vec3 r g b) <- processPixelData sampleSize <$> foldlM f (Vec3 0 0 0) [1 .. sampleSize]
+    (Vec3 r g b) <- processPixelData samples <$> foldlM f (Vec3 0 0 0) [1 .. samples]
     return $
       PixelRGB r g b
 
@@ -86,13 +68,3 @@ sky r = do
   let (Vec3 _ y _) = unit $ direction r
   let t = 0.5 * (y + 1)
   (1 - t) `scalarMul` Vec3 1 1 1 `add` (t `scalarMul` Vec3 0.5 0.7 1.0)
-
-genScene :: Scene Object
-genScene =
-  Scene
-    [ Object (Sphere (Vec3 0 0 (-1)) 0.5) (Diffuse $ Vec3 0.8 0.8 0),
-      Object (Sphere (Vec3 0 (-100.5) (-1)) 100) (Metal (Vec3 0.1 0.1 0.7) 0.5),
-      Object (Sphere (Vec3 1.0 0 (-2)) 0.5) (Diffuse black),
-      Object (Sphere (Vec3 (-2) 0 (-1.5)) 0.5) (Metal (Vec3 0.8 0.8 0.8) 0),
-      Object (Sphere (Vec3 0.27 0.1 (-0.5)) 0.05) (Glass 0.5)
-    ]

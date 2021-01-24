@@ -37,6 +37,7 @@ library
       Ray
       Scene
       Utils
+      ImageSettings
   other-modules:
       Paths_raytracer_hs
   hs-source-dirs:
