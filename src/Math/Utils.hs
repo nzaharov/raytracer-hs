@@ -9,3 +9,9 @@ smaller :: Double -> Double -> Double
 smaller a b
   | a <= b = a
   | otherwise = b
+
+clamp :: Ord a => a -> (a, a) -> a
+clamp x (a, b)
+  | x > b = b
+  | x < a = a
+  | otherwise = x

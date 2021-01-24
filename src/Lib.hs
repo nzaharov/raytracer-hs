@@ -3,8 +3,11 @@ module Lib
   )
 where
 
+import Data.Foldable
+import GHC.IO
 import Graphics.Image as I
 import Material
+import Math.Utils
 import Math.Vector
 import Object
 import Ray
@@ -14,11 +17,17 @@ import Prelude as P
 
 data TempCamera = Camera (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
 
+width :: Int
+width = 640
+
+height :: Int
+height = 360
+
+sampleSize :: Int
+sampleSize = 10
+
 draw :: IO ()
 draw = do
-  rng <- getStdGen
-  let width = 1280
-  let height = 720
   -- camera
   let vh = 2.0
   let vw = (fromIntegral width / fromIntegral height) * vh
@@ -33,29 +42,56 @@ draw = do
           `subtr` Vec3 0 0 focalLength
   let camera = Camera origin horz vert corner
   let scene = genScene
-  let img = flipV $ makeImageR VS (height, width) (getPixel rng camera scene)
-  writeImage "test.png" img
+  putStrLn "Rendering..."
+  pixels <- mapM (getPixel camera scene) [(j, i) | j <- [0 .. height - 1], i <- [0 .. width - 1]]
+  putStrLn "Saving image..."
+  writeImage "test.png" $ flipV ((fromLists $ chunks width pixels) :: Image RSU RGB Double)
+  putStrLn "Done!"
 
-getPixel :: StdGen -> TempCamera -> Scene Object -> (Int, Int) -> Pixel RGB Double
-getPixel rng (Camera origin w h corner) scene (row, col) =
+chunks :: Int -> [a] -> [[a]]
+chunks _ [] = []
+chunks n l
+  | n > 0 = take n l : chunks n (drop n l)
+  | otherwise = error "Negative or zero n"
+
+getPixel :: TempCamera -> Scene Object -> (Int, Int) -> IO (Pixel RGB Double)
+getPixel (Camera origin w h corner) scene (row, col) =
   do
-    let u = fromIntegral col / 1279
-    let v = fromIntegral row / 719
-    let ray = Ray origin (corner `add` scalarMul u w `add` scalarMul v h `subtr` origin)
-    let (Vec3 r g b) = raytrace rng scene ray 50
-    PixelRGB r g b
+    let f = \acc _ ->
+          do
+            r1 <- randomIO
+            r2 <- randomIO
+            let u = (fromIntegral col + r1) / (fromIntegral width - 1)
+            let v = (fromIntegral row + r2) / (fromIntegral height - 1)
+            let ray =
+                  Ray
+                    origin
+                    (corner `add` scalarMul u w `add` scalarMul v h `subtr` origin)
+            color <- raytrace scene ray 1
+            return $ acc `add` color
 
-raytrace :: StdGen -> Scene Object -> Ray -> Int -> Color
-raytrace rng scene ray depth = do
+    (Vec3 r g b) <- processPixelData sampleSize <$> foldlM f (Vec3 0 0 0) [1 .. sampleSize]
+    return $
+      PixelRGB r g b
+
+processPixelData :: Int -> Color -> Color
+processPixelData samples (Vec3 r g b) = Vec3 (correct r) (correct g) (correct b)
+  where
+    scale = 1.0 / fromIntegral samples
+    correct = \x -> clamp (sqrt $ scale * x) (0, 0.999)
+
+raytrace :: Scene Object -> Ray -> Int -> IO Color
+raytrace scene ray depth = do
   if depth <= 0
-    then black
+    then return black
     else do
       let sphereHit = intersect scene ray 0.001 100000000000
       case sphereHit of
         Just hit -> do
-          let (scattered, color) = scatter (mat hit) rng ray hit
-          color `mul` raytrace rng scene scattered (depth - 1)
-        Nothing -> sky ray
+          (scattered, color) <- scatter (mat hit) ray hit
+          childRayColor <- raytrace scene scattered (depth - 1)
+          return $ color `mul` childRayColor
+        Nothing -> return $ sky ray
 
 sky :: Ray -> Color
 sky r = do
@@ -67,5 +103,5 @@ genScene :: Scene Object
 genScene =
   Scene
     [ Object (Sphere (Vec3 0 0 (-1)) 0.5) (Diffuse $ Vec3 0.8 0.8 0),
-      Object (Sphere (Vec3 0 (-100.5) (-1)) 100) (Diffuse $ Vec3 0.1 0.6 0.1)
+      Object (Sphere (Vec3 0 (-100.5) (-1)) 100) (Diffuse $ Vec3 0.1 0.1 0.7)
     ]
