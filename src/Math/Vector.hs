@@ -34,27 +34,39 @@ unit vec = vec `divScalar` norm vec
 dot :: Num a => Vec3 a -> Vec3 a -> a
 dot (Vec3 x y z) (Vec3 x' y' z') = x * x' + y * y' + z * z'
 
-randVecInRange :: (Double, Double) -> IO (Vec3 Double)
-randVecInRange range = do
+randInSphere :: (Double, Double) -> IO (Vec3 Double)
+randInSphere range = do
   x <- randomRIO range
   y <- randomRIO range
   z <- randomRIO range
   return $ Vec3 x y z
 
 randInUnitSphere :: IO (Vec3 Double)
-randInUnitSphere = do
-  initialRand <- randVecInRange (-1, 1)
+randInUnitSphere = untilUnit (-1, 1) randInSphere
+
+randInUnitDisc :: IO (Vec3 Double)
+randInUnitDisc = untilUnit (-1, 1) randInDisc
+
+randInDisc :: (Double, Double) -> IO (Vec3 Double)
+randInDisc range = do
+  x <- randomRIO range
+  y <- randomRIO range
+  return $ Vec3 x y 0
+
+untilUnit :: a -> (a -> IO (Vec3 Double)) -> IO (Vec3 Double)
+untilUnit a g = do
+  initialRand <- g a
   loop initialRand
   where
     loop vec = do
       if normSqr vec < 1
         then return vec
         else do
-          rand <- randVecInRange (-1, 1)
+          rand <- g a
           loop rand
 
-randInHemi :: Vec3 Double -> IO (Vec3 Double)
-randInHemi normal = do
+randInUnitHemi :: Vec3 Double -> IO (Vec3 Double) -- can be used as an alternative for Lambertian diffuse
+randInUnitHemi normal = do
   inSphere <- randInUnitSphere
   if normal `dot` inSphere > 0
     then return inSphere
