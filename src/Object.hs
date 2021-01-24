@@ -20,4 +20,3 @@ instance Intersectable Object where
     let hitPoint = ray `at` rootMin
     let normal = (hitPoint `subtr` center) `divScalar` r
     Just $ Hit hitPoint normal rootMin mat
-  intersect _ _ _ _ = undefined
