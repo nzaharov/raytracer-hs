@@ -3,7 +3,7 @@ module Scene where
 import Data.Foldable (Foldable (foldl'))
 import Material
 
-newtype Scene a = Scene [a]
+newtype Scene a = Scene [a] deriving (Show)
 
 instance Intersectable a => Intersectable (Scene a) where
   intersect (Scene objects) ray min max = fst $ foldl' f (Nothing, max) objects

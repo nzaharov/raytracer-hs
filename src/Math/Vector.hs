@@ -42,9 +42,20 @@ randVecInRange range = do
   return $ Vec3 x y z
 
 randInUnitSphere :: IO (Vec3 Double)
-randInUnitSphere = loop <$> randVecInRange (-1, 1)
+randInUnitSphere = do
+  initialRand <- randVecInRange (-1, 1)
+  loop initialRand
   where
     loop vec = do
       if normSqr vec < 1
-        then vec
-        else loop vec
+        then return vec
+        else do
+          rand <- randVecInRange (-1, 1)
+          loop rand
+
+randInHemi :: Vec3 Double -> IO (Vec3 Double)
+randInHemi normal = do
+  inSphere <- randInUnitSphere
+  if normal `dot` inSphere > 0
+    then return inSphere
+    else return $ Vec3 0 0 0 `subtr` inSphere

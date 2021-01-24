@@ -4,7 +4,7 @@ import Math.Vector
 
 type Color = Vec3 Double
 
-data Ray = Ray (Vec3 Double) (Vec3 Double)
+data Ray = Ray (Vec3 Double) (Vec3 Double) deriving (Show)
 
 direction :: Ray -> Vec3 Double
 direction (Ray _ direction) = direction

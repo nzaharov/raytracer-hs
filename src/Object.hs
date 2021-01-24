@@ -5,7 +5,7 @@ import Math.Quadratic
 import Math.Vector
 import Ray
 
-data Object = Object Geometry Material
+data Object = Object Geometry Material deriving (Show)
 
 data Geometry = Sphere (Vec3 Double) Double deriving (Show)
 

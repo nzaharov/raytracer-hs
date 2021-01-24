@@ -24,6 +24,15 @@ dependencies:
 
 library:
   source-dirs: src
+  ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O2
+    - -funfolding-use-threshold=16
+    - -fexcess-precision
+    - -optc-O3
+    - -optc-ffast-math
   dependencies:
     - hip
     - random
@@ -36,6 +45,11 @@ executables:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
+      - -O2
+      - -funfolding-use-threshold=16
+      - -fexcess-precision
+      - -optc-O3
+      - -optc-ffast-math
     dependencies:
       - raytracer-hs
 

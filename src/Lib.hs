@@ -18,13 +18,13 @@ import Prelude as P
 data TempCamera = Camera (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
 
 width :: Int
-width = 640
+width = 320
 
 height :: Int
-height = 360
+height = 180
 
 sampleSize :: Int
-sampleSize = 10
+sampleSize = 50
 
 draw :: IO ()
 draw = do
@@ -67,7 +67,7 @@ getPixel (Camera origin w h corner) scene (row, col) =
                   Ray
                     origin
                     (corner `add` scalarMul u w `add` scalarMul v h `subtr` origin)
-            color <- raytrace scene ray 1
+            color <- raytrace scene ray 50
             return $ acc `add` color
 
     (Vec3 r g b) <- processPixelData sampleSize <$> foldlM f (Vec3 0 0 0) [1 .. sampleSize]
@@ -103,5 +103,8 @@ genScene :: Scene Object
 genScene =
   Scene
     [ Object (Sphere (Vec3 0 0 (-1)) 0.5) (Diffuse $ Vec3 0.8 0.8 0),
-      Object (Sphere (Vec3 0 (-100.5) (-1)) 100) (Diffuse $ Vec3 0.1 0.1 0.7)
+      Object (Sphere (Vec3 0 (-100.5) (-1)) 100) (Diffuse $ Vec3 0.1 0.1 0.7),
+      Object (Sphere (Vec3 1.0 0 (-2)) 0.5) (Diffuse $ Vec3 1 0 0),
+      Object (Sphere (Vec3 (-2) 0 (-1.5)) 0.5) (Diffuse $ Vec3 0.8 0.8 0),
+      Object (Sphere (Vec3 0.27 0.1 (-0.5)) 0.05) (Diffuse $ Vec3 1 1 1)
     ]

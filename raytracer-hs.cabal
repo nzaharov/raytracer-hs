@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d1b4a1ef2560604bcf82e2b2ee3a7ab0e916ce0ca593d59bca83099d9ec5fda2
+-- hash: 7d3e19e537b4d37ae57b3c989412dc35ae01d9b6e2efde268eba5c876b51b39a
 
 name:           raytracer-hs
 version:        0.1.0.0
@@ -40,6 +40,7 @@ library
       Paths_raytracer_hs
   hs-source-dirs:
       src
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2 -funfolding-use-threshold=16 -fexcess-precision -optc-O3 -optc-ffast-math
   build-depends:
       base >=4.7 && <5
     , hip
@@ -52,7 +53,7 @@ executable raytracer-hs-exe
       Paths_raytracer_hs
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2 -funfolding-use-threshold=16 -fexcess-precision -optc-O3 -optc-ffast-math
   build-depends:
       base >=4.7 && <5
     , raytracer-hs
