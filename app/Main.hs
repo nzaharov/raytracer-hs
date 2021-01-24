@@ -18,7 +18,7 @@ setImage = ImageSettings 640 360 "balls.png" 50
 setCamera :: Camera
 setCamera =
   Camera
-    (Vec3 0.0 0.0 0.0)
+    (Vec3 0.5 0.5 0)
     (Vec3 0.0 0.0 (-1.0))
     (Vec3 0.0 1.0 0.0)
     75.0

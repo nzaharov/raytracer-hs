@@ -8,12 +8,12 @@ cabal-version: 1.12
 
 name:           raytracer-hs
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/raytracer-hs#readme>
-homepage:       https://github.com/githubuser/raytracer-hs#readme
-bug-reports:    https://github.com/githubuser/raytracer-hs/issues
-author:         Author name here
+description:    Please see the README on GitHub at <https://github.com/nzaharov/raytracer-hs#readme>
+homepage:       https://github.com/nzaharov/raytracer-hs#readme
+bug-reports:    https://github.com/nzaharov/raytracer-hs/issues
+author:         Nikolay Zaharov
 maintainer:     example@example.com
-copyright:      2021 Author name here
+copyright:      2021 Nikolay Zaharov
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/raytracer-hs
+  location: https://github.com/nzaharov/raytracer-hs
 
 library
   exposed-modules:
@@ -42,7 +42,6 @@ library
       Paths_raytracer_hs
   hs-source-dirs:
       src
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2 -funfolding-use-threshold=16 -fexcess-precision -optc-O3 -optc-ffast-math
   build-depends:
       base >=4.7 && <5
     , hip
