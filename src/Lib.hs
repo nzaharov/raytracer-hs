@@ -13,6 +13,7 @@ import Object
 import Ray
 import Scene
 import System.Random
+import Utils
 import Prelude as P
 
 data TempCamera = Camera (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
@@ -47,12 +48,6 @@ draw = do
   putStrLn "Saving image..."
   writeImage "test.png" $ flipV ((fromLists $ chunks width pixels) :: Image RSU RGB Double)
   putStrLn "Done!"
-
-chunks :: Int -> [a] -> [[a]]
-chunks _ [] = []
-chunks n l
-  | n > 0 = take n l : chunks n (drop n l)
-  | otherwise = error "Negative or zero n"
 
 getPixel :: TempCamera -> Scene Object -> (Int, Int) -> IO (Pixel RGB Double)
 getPixel (Camera origin w h corner) scene (row, col) =
