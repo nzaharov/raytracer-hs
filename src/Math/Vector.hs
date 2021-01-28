@@ -4,6 +4,15 @@ import System.Random
 
 data Vec3 a = Vec3 a a a deriving (Show, Eq)
 
+dimX :: Vec3 a -> a
+dimX (Vec3 x _ _) = x
+
+dimY :: Vec3 a -> a
+dimY (Vec3 _ y _) = y
+
+dimZ :: Vec3 a -> a
+dimZ (Vec3 _ _ z) = z
+
 add :: Num a => Vec3 a -> Vec3 a -> Vec3 a
 (Vec3 x y z) `add` (Vec3 x' y' z') = Vec3 (x + x') (y + y') (z + z')
 

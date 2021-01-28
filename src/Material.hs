@@ -23,7 +23,8 @@ class Material_ a where
   scatter :: a -> Ray -> Hit -> IO (Ray, Color)
 
 data Material
-  = Diffuse Color
+  = None
+  | Diffuse Color
   | Metal Color Double
   | Glass Double
   deriving (Show, Eq)
@@ -72,7 +73,7 @@ refract ratio axis vec = do
   let rPar = (- (sqrt $ abs (1 - normSqr rPerp))) `scalarMul` axis
   rPerp `add` rPar
 
-reflectance :: Double -> Double -> Double -- Schlick approximation
+reflectance :: Double -> Double -> Double
 reflectance cosAngle refrRatio = do
   let r0 = (1 - refrRatio) / (1 + refrRatio)
   let r0Sqr = r0 * r0
