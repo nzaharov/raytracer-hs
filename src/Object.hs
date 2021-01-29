@@ -3,7 +3,8 @@
 module Object where
 
 import Control.Applicative
-import Control.Monad
+import Data.List (minimumBy)
+import Data.Maybe
 import Material
 import Math.Quadratic
 import Math.Vector
@@ -17,6 +18,7 @@ data Geometry
   | Plane (Vec3 Double) (Vec3 Double) (Vec3 Double)
   | Rect (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
   | Triangle (Vec3 Double) (Vec3 Double) (Vec3 Double)
+  | Tetrahedron (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
   deriving (Show)
 
 instance Intersectable Object where
@@ -25,6 +27,7 @@ instance Intersectable Object where
     Just $ Hit point normal t mat
 
 instance Intersectable Geometry where
+  -- Sphere
   intersect (Sphere center r) ray min max = do
     let oc = origin ray `subtr` center
     let a = normSqr $ direction ray
@@ -35,15 +38,20 @@ instance Intersectable Geometry where
     let hitPoint = ray `at` rootMin
     let normal = (hitPoint `subtr` center) `divScalar` r
     Just $ Hit hitPoint normal rootMin None
+
+  -- Plane
   intersect (Plane _p1 p2 normal) ray min max = do
     let denominator = direction ray `dot` normal
     let t = ((p2 `subtr` origin ray) `dot` normal) / denominator
     if t < min || t > max
       then Nothing
       else Just $ Hit (ray `at` t) normal t None
+
+  -- Rectangle
   intersect (Rect a b c d) ray min max =
     intersect (Triangle a b c) ray min max
       <|> intersect (Triangle c d a) ray min max
+  -- Triangle
   intersect (Triangle v1 v2 v3) ray min max = do
     let edge1 = v2 `subtr` v1
     let edge2 = v3 `subtr` v1
@@ -61,3 +69,16 @@ instance Intersectable Geometry where
           let t = invDet * edge2 `dot` q
           maybeUnless (t < min || t > max) $
             Just $ Hit (ray `at` t) (edge1 `cross` edge2) t None
+
+  -- Tetrahedron
+  intersect (Tetrahedron a b c d) ray min max = do
+    let hits =
+          catMaybes
+            [ intersect (Triangle a b c) ray min max,
+              intersect (Triangle c d a) ray min max,
+              intersect (Triangle a b d) ray min max,
+              intersect (Triangle d c b) ray min max
+            ]
+    if null hits
+      then Nothing
+      else Just $minimumBy (\a b -> compare (t a) (t b)) hits
