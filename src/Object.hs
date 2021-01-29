@@ -2,6 +2,7 @@
 
 module Object where
 
+import Control.Applicative
 import Control.Monad
 import Material
 import Math.Quadratic
@@ -14,7 +15,7 @@ data Object = Object Geometry Material deriving (Show)
 data Geometry
   = Sphere (Vec3 Double) Double
   | Plane (Vec3 Double) (Vec3 Double) (Vec3 Double)
-  | Wall (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
+  | Rect (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
   | Triangle (Vec3 Double) (Vec3 Double) (Vec3 Double)
   deriving (Show)
 
@@ -40,16 +41,9 @@ instance Intersectable Geometry where
     if t < min || t > max
       then Nothing
       else Just $ Hit (ray `at` t) normal t None
-  intersect (Wall a b c d) ray min max = do
-    -- a - b
-    -- d - c
-    let normal = (a `subtr` c) `cross` (b `subtr` d)
-    hit <- intersect (Plane a b normal) ray min max
-    let (Vec3 x y _) = point hit
-    -- TODO account for axis orientation
-    if x >= dimX a && x <= dimX b && y <= dimY b && y >= dimY c
-      then Just hit
-      else Nothing
+  intersect (Rect a b c d) ray min max =
+    intersect (Triangle a b c) ray min max
+      <|> intersect (Triangle c d a) ray min max
   intersect (Triangle v1 v2 v3) ray min max = do
     let edge1 = v2 `subtr` v1
     let edge2 = v3 `subtr` v1
