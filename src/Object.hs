@@ -2,10 +2,12 @@
 
 module Object where
 
+import Control.Monad
 import Material
 import Math.Quadratic
 import Math.Vector
 import Ray
+import Utils
 
 data Object = Object Geometry Material deriving (Show)
 
@@ -13,6 +15,7 @@ data Geometry
   = Sphere (Vec3 Double) Double
   | Plane (Vec3 Double) (Vec3 Double) (Vec3 Double)
   | Wall (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
+  | Triangle (Vec3 Double) (Vec3 Double) (Vec3 Double)
   deriving (Show)
 
 instance Intersectable Object where
@@ -47,3 +50,20 @@ instance Intersectable Geometry where
     if x >= dimX a && x <= dimX b && y <= dimY b && y >= dimY c
       then Just hit
       else Nothing
+  intersect (Triangle v1 v2 v3) ray min max = do
+    let edge1 = v2 `subtr` v1
+    let edge2 = v3 `subtr` v1
+    let h = direction ray `cross` edge2
+    let det = edge1 `dot` h
+    maybeUnless (abs det < 1e-6) $ do
+      -- check if parallel to plane
+      let invDet = 1.0 / det
+      let s = origin ray `subtr` v1
+      let u = invDet * (s `dot` h)
+      maybeUnless (u < 0 || u > 1) $ do
+        let q = s `cross` edge1
+        let v = invDet * direction ray `dot` q
+        maybeUnless (v < 0 || u + v > 1) $ do
+          let t = invDet * edge2 `dot` q
+          maybeUnless (t < min || t > max) $
+            Just $ Hit (ray `at` t) (edge1 `cross` edge2) t None
