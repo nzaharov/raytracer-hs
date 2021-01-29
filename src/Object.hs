@@ -19,6 +19,15 @@ data Geometry
   | Rect (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
   | Triangle (Vec3 Double) (Vec3 Double) (Vec3 Double)
   | Tetrahedron (Vec3 Double) (Vec3 Double) (Vec3 Double) (Vec3 Double)
+  | Cuboid
+      (Vec3 Double)
+      (Vec3 Double)
+      (Vec3 Double)
+      (Vec3 Double)
+      (Vec3 Double)
+      (Vec3 Double)
+      (Vec3 Double)
+      (Vec3 Double)
   deriving (Show)
 
 instance Intersectable Object where
@@ -71,14 +80,33 @@ instance Intersectable Geometry where
             Just $ Hit (ray `at` t) (edge1 `cross` edge2) t None
 
   -- Tetrahedron
-  intersect (Tetrahedron a b c d) ray min max = do
-    let hits =
-          catMaybes
-            [ intersect (Triangle a b c) ray min max,
-              intersect (Triangle c d a) ray min max,
-              intersect (Triangle a b d) ray min max,
-              intersect (Triangle d c b) ray min max
-            ]
-    if null hits
-      then Nothing
-      else Just $minimumBy (\a b -> compare (t a) (t b)) hits
+  intersect (Tetrahedron a b c d) ray min max =
+    compositeIntersect
+      [ Triangle a b c,
+        Triangle c d a,
+        Triangle a b d,
+        Triangle d c b
+      ]
+      ray
+      min
+      max
+  -- Cuboid
+  intersect (Cuboid a1 a2 a3 a4 b1 b2 b3 b4) ray min max =
+    compositeIntersect -- this can probably be generalized more
+      [ Rect a1 a2 a3 a4,
+        Rect b1 b2 b3 b4,
+        Rect a1 a2 b2 b1,
+        Rect a3 a4 b4 b3,
+        Rect a2 a3 b3 b2,
+        Rect a1 a4 b4 b1
+      ]
+      ray
+      min
+      max
+
+compositeIntersect :: Intersectable a => [a] -> Ray -> Double -> Double -> Maybe Hit
+compositeIntersect figures ray min max
+  | null hits = Nothing
+  | otherwise = Just $ minimumBy (\a b -> compare (t a) (t b)) hits
+  where
+    hits = mapMaybe (\figure -> intersect figure ray min max) figures

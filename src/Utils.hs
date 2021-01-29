@@ -9,4 +9,4 @@ chunks n l
   | otherwise = error "Negative or zero n"
 
 maybeUnless :: Bool -> Maybe a -> Maybe a
-maybeUnless p s = join $ if p then pure Nothing else Just s
+maybeUnless p s = join $ if p then Nothing else Just s
